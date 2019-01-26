@@ -336,3 +336,24 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r Prognosticator}
     source("Prognosticator.R")
 ```
+
+
+### References: 
+1. http://www.aclweb.org/anthology/D07-1090.pdf
+2. https://github.com/wright13/DataScienceCapstoneSBO
+3. https://github.com/dmodjeska/word_prediction/blob/master/predict.R
+4. https://github.com/youyouworld010/DataScienceCapstone/blob/master/Prediction%20Model.Rmd
+5. https://github.com/bradleyboehmke/word_prediction_app/blob/master/extracting_n-grams.R
+6. https://github.com/yeongwei/coursera-datascience-capstone/blob/master/week3-buildingPredictiveModel.R
+7. https://github.com/yufree/Capstone/blob/master/finalreport.Rmd
+8. https://github.com/j-wang/DataScienceCapstone
+9. https://github.com/ThachNgocTran/KatzBackOffModelImplementationInR/blob/master/estimateProbability.R
+10.https://rstudio-pubs-static.s3.amazonaws.com/48094_bb9c77ab4c234074a66726961829af0b.html#/1
+11.http://www.modsimworld.org/papers/2015/Natural_Language_Processing.pdf
+12.https://github.com/ambodi/LanguageModelWithStupidBackoff/blob/master/backoff.R
+13.http://spring2015.cs-114.org/wp-content/uploads/2016/01/NgramModels.pdf
+14.http://l2r.cs.uiuc.edu/~danr/Teaching/CS546-09/Papers/Katz87.pdf
+15.https://rpubs.com/erodriguez/nlpquanteda
+16.http://rpubs.com/erodriguez/milestone1
+17.https://rpubs.com/jbonsak/capstonefinal
+18.https://rstudio-pubs-static.s3.amazonaws.com/304141_7cc99677660842599c2a35698adddfa8.html

@@ -76,3 +76,7 @@ knitr::opts_chunk$set(echo = TRUE)
         return(prognostication)
     }
 ```
+
+
+References:
+See references at the end of PipelineMarkdown
