@@ -24,6 +24,9 @@
         suppressMessages(library(data.table))
         suppressMessages(library(readtext))
         suppressMessages(library(dplyr))
+        suppressMessages(library(R.utils))
+        suppressMessages(library(rlang))
+        suppressMessages(library(stringr))
         
     # 2. Open the Corpora, Read raw test, Count lines
         ## Read the Raw Text
@@ -81,7 +84,7 @@
                 print(file.path)
                 corpus.Number <- readLines(file.path)
                 corpus.Number <- sapply(corpus.Number, tolower, USE.NAMES = F) # removes all capital letters
-                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[a-z']", " "), USE.NAMES = F)
+                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[^a-z']", " "), USE.NAMES = F)
                 # above line replaces all text that is not a lower case letter or an apostrophe [] = NOT
                 corpus.Number <- corpus(corpus.Number) # converts type string to corpus
                 corpus.Tokens <- tokens(corpus.Number, what = "word", ngrams = 2:5) 
@@ -110,7 +113,7 @@
                 print(file.path)
                 corpus.Number <- readLines(file.path)
                 corpus.Number <- sapply(corpus.Number, tolower, USE.NAMES = F)
-                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[a-z']", " "), USE.NAMES = F)
+                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[^a-z']", " "), USE.NAMES = F)
                 corpus.Number <- corpus(corpus.Number)
                 corpus.Tokens <- tokens(corpus.Number, what = "word", ngrams = 2:5)
                 rm(corpus.Number)
@@ -135,7 +138,7 @@
                 print(file.path)
                 corpus.Number <- readLines(file.path)
                 corpus.Number <- sapply(corpus.Number, tolower, USE.NAMES = F)
-                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[a-z']", " "), USE.NAMES = F)
+                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[^a-z']", " "), USE.NAMES = F)
                 corpus.Number <- corpus(corpus.Number)
                 corpus.Tokens <- tokens(corpus.Number, what = "word", ngrams = 2:5)
                 rm(corpus.Number)
@@ -145,7 +148,7 @@
                 rm(corpus.Tokens)
                 gc()
             }
-            print(Sys.time() - To)
+            print(Sys.time() - To); print("Over half way done!")
             
             save(ngram.Table, file = paste0(path, "ngram.Table3.RData"))
             rm(ngram.Table)
@@ -159,7 +162,7 @@
                 print(file.path)
                 corpus.Number <- readLines(file.path)
                 corpus.Number <- sapply(corpus.Number, tolower, USE.NAMES = F)
-                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[a-z']", " "), USE.NAMES = F)
+                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[^a-z']", " "), USE.NAMES = F)
                 corpus.Number <- corpus(corpus.Number)
                 corpus.Tokens <- tokens(corpus.Number, what = "word", ngrams = 2:5)
                 rm(corpus.Number)
@@ -183,7 +186,7 @@
                 print(file.path)
                 corpus.Number <- readLines(file.path)
                 corpus.Number <- sapply(corpus.Number, tolower, USE.NAMES = F)
-                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[a-z']", " "), USE.NAMES = F)
+                corpus.Number <- sapply(corpus.Number, function(x) str_replace_all(x, "[^a-z']", " "), USE.NAMES = F)
                 corpus.Number <- corpus(corpus.Number)
                 corpus.Tokens <- tokens(corpus.Number, what = "word", ngrams = 2:5)
                 rm(corpus.Number)
@@ -211,52 +214,51 @@
         
         ## Filter Chunk 1 of 5
             load(paste0(path, "ngram.Table", 1, ".RData"))
-            ngram.Table <- ngram.Table[, list(phrase = sub("_[^_]+$", "", nGram), 
-                                              prediction = sub("^([^_]+_)+", "", nGram), count)]
-            # Above line looks in the 
-            ngram.Table <- ngram.Table[!(prediction %in% nasty)]
-            ngram.Table <- ngram.Table[, phrase.count := sum(count), phrase]
-            ngram.Table <- ngram.Table[phrase.count > 2]
+            ngram.Table <- ngram.Table[, list(Phrase = sub("_[^_]+$", "", nGram), 
+                                              Prediction = sub("^([^_]+_)+", "", nGram), Count)]
+            ngram.Table <- ngram.Table[!(Prediction %in% nasty)]
+            ngram.Table <- ngram.Table[, Phrase.Count := sum(Count), Phrase]
+            ngram.Table <- ngram.Table[Phrase.Count > 2] # Need to have > 2 for processing capabilities, cuts down my more than 50%
             save(ngram.Table, file = paste0(path, "filtered_", 1, ".RData"))
             rm(ngram.Table); gc()
             
         ## Filter Chunk 2 of 5
             load(paste0(path, "ngram.Table", 2, ".RData"))
-            ngram.Table <- ngram.Table[, list(phrase = sub("_[^_]+$", "", nGram), 
-                                              prediction = sub("^([^_]+_)+", "", nGram), count)]
-            ngram.Table <- ngram.Table[!(prediction %in% nasty)]
-            ngram.Table <- ngram.Table[, phrase.count := sum(count), phrase]
-            ngram.Table <- ngram.Table[phrase.count > 2]
+            ngram.Table <- ngram.Table[, list(Phrase = sub("_[^_]+$", "", nGram), 
+                                              Prediction = sub("^([^_]+_)+", "", nGram), Count)]
+            ngram.Table <- ngram.Table[!(Prediction %in% nasty)]
+            ngram.Table <- ngram.Table[, Phrase.Count := sum(Count), Phrase]
+            ngram.Table <- ngram.Table[Phrase.Count > 2]
             save(ngram.Table, file = paste0(path, "filtered_", 2, ".RData"))
             rm(ngram.Table); gc()
             
         ## Filter Chunk 3 of 5
             load(paste0(path, "ngram.Table", 3, ".RData"))
-            ngram.Table <- ngram.Table[, list(phrase = sub("_[^_]+$", "", nGram), 
-                                              prediction = sub("^([^_]+_)+", "", nGram), count)]
-            ngram.Table <- ngram.Table[!(prediction %in% nasty)]
-            ngram.Table <- ngram.Table[, phrase.count := sum(count), phrase]
-            ngram.Table <- ngram.Table[phrase.count > 2]
+            ngram.Table <- ngram.Table[, list(Phrase = sub("_[^_]+$", "", nGram), 
+                                              Prediction = sub("^([^_]+_)+", "", nGram), Count)]
+            ngram.Table <- ngram.Table[!(Prediction %in% nasty)]
+            ngram.Table <- ngram.Table[, Phrase.Count := sum(Count), Phrase]
+            ngram.Table <- ngram.Table[Phrase.Count > 2]
             save(ngram.Table, file = paste0(path, "filtered_", 3, ".RData"))
             rm(ngram.Table); gc()
             
         ## Filter Chunk 4 of 5
             load(paste0(path, "ngram.Table", 4, ".RData"))
-            ngram.Table <- ngram.Table[, list(phrase = sub("_[^_]+$", "", nGram), 
-                                              prediction = sub("^([^_]+_)+", "", nGram), count)]
-            ngram.Table <- ngram.Table[!(prediction %in% nasty)]
-            ngram.Table <- ngram.Table[, phrase.count := sum(count), phrase]
-            ngram.Table <- ngram.Table[phrase.count > 2]
+            ngram.Table <- ngram.Table[, list(Phrase = sub("_[^_]+$", "", nGram), 
+                                              Prediction = sub("^([^_]+_)+", "", nGram), Count)]
+            ngram.Table <- ngram.Table[!(Prediction %in% nasty)]
+            ngram.Table <- ngram.Table[, Phrase.Count := sum(Count), Phrase]
+            ngram.Table <- ngram.Table[Phrase.Count > 2]
             save(ngram.Table, file = paste0(path, "filtered_", 4, ".RData"))
             rm(ngram.Table); gc()
             
         ## Filter Chunk 5 of 5
             load(paste0(path, "ngram.Table", 5, ".RData"))
-            ngram.Table <- ngram.Table[, list(phrase = sub("_[^_]+$", "", nGram), 
-                                              prediction = sub("^([^_]+_)+", "", nGram), count)]
-            ngram.Table <- ngram.Table[!(prediction %in% nasty)]
-            ngram.Table <- ngram.Table[, phrase.count := sum(count), phrase]
-            ngram.Table <- ngram.Table[phrase.count > 2]
+            ngram.Table <- ngram.Table[, list(Phrase = sub("_[^_]+$", "", nGram), 
+                                              Prediction = sub("^([^_]+_)+", "", nGram), Count)]
+            ngram.Table <- ngram.Table[!(Prediction %in% nasty)]
+            ngram.Table <- ngram.Table[, Phrase.Count := sum(Count), Phrase]
+            ngram.Table <- ngram.Table[Phrase.Count > 2]
             save(ngram.Table, file = paste0(path, "filtered_", 5, ".RData"))
             rm(ngram.Table); gc()
             
@@ -284,15 +286,16 @@
     # 7. Process aggregates, probabilites, order, and save as text
         load(paste0(path, "filtered.RData"))
         
-        ngram.Table <- ngram.Table[, lapply(.SD, sum, na.rm = T), by = list(phrase, prediction)]
-        ngram.Table <- setorder(ngram.Table, phrase, -count)[, index := seq_len(.N), by = phrase]
+        ngram.Table <- ngram.Table[, lapply(.SD, sum, na.rm = T), by = list(Phrase, Prediction)]
+        ngram.Table <- setorder(ngram.Table, Phrase, -Count)[, index := seq_len(.N), by = Phrase]
         
         
         ngram.Table <- ngram.Table[index <= 8] 
-        ngram.Table[, probability := count / phrase.count]
-        ngram.Table <- setorder(ngram.Table, phrase, -probability)[, index := seq_len(.N), by = phrase]
-        fwrite(ngram.Table[, c("phrase", "prediction", "probability")], 
-               file = paste0(path, "filtered.txt"), append = F)
+        ngram.Table[, Probability := Count / Phrase.Count]
+        ngram.Table <- setorder(ngram.Table, Phrase, -Probability)[, index := seq_len(.N), by = Phrase]
+        # Write the filtered text file to the folder containing the app source file to be deployed on ShinyApps
+        fwrite(ngram.Table[, c("Phrase", "Prediction", "Probability")], 
+               file = paste0(working.directory, "Prognosticator/filtered.txt"), append = F)
         rm(ngram.Table); gc()
         
     # 8. Source Prognosticator
