@@ -7,9 +7,7 @@ output:
         keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
-```
+
 
 Prognosicator is the back-end of the Coursera Capstone Project in collaboration with Swift-Key for the Data Science Specialization through Johns-Hopkins University. The Prognosicator Pipeline uses text data from English language corpora obtained from news sources, blogs, and twitter feeds. Following processing, these corpora are used to make predictions for the next word. All new word predictions have profanities removed, however the program still makes predictions based on profinities in the input phrases. 
 
@@ -33,7 +31,8 @@ This code broke the raw corpora into 20 smaller corpus files to process n-grams,
 
 ## Preprocessing
 ### 1. Set the directory, path, and open all of the libraries 
-```{r Directory, echo=TRUE}
+
+```r
     working.directory <- "C:/Users/Caroline/Desktop/Coursera-SwiftKey/"
         setwd(working.directory)
         path <- paste0(working.directory, "data/final/en_US/")
@@ -50,7 +49,8 @@ This code broke the raw corpora into 20 smaller corpus files to process n-grams,
 ### 2. Open, Read, Count Lines
     
 Open the corpora
-``` {r Open, echo=TRUE}
+
+```r
     options(warn = -1)
     unzip("Coursera-Swiftkey.zip", exdir = "data", overwrite = FALSE, setTimes = FALSE)
     blog.con <- file(paste0(path, "en_US.blogs.txt"), "rb", encoding = "UTF-8")
@@ -59,7 +59,8 @@ Open the corpora
 ```
     
 Open the number of lines in each corpus
-```{r Lines, echo=TRUE}    
+
+```r
     blog.lines <- countLines(paste0(path, "en_US.blogs.txt"))
     news.lines <- countLines(paste0(path, "en_US.news.txt"))
     twitter.lines <- countLines(paste0(path, "en_US.twitter.txt"))
@@ -68,14 +69,16 @@ Open the number of lines in each corpus
 ### 3. Split the corpora into different data sets and write to 20 smaller files
 
 Set seed and establish Test and Training Paths
-``` {r Split, echo=TRUE}
+
+```r
     set.seed(1117)
     training <- lapply(paste0(path, "training_", 1:20, ".txt"), file, "w")
     testing <- file(paste0(path, "testing.txt"), "w")
 ```
 
 Define the Corpus Axe text splitting function, a similar function is used for the input text
-``` {r Axe, echo=TRUE}
+
+```r
     corpus.Axe <- function(corpus.con, corpus.lines) {
             training.Number <- rbinom(corpus.lines, 1, 0.9) # Strip 90% of the text for the training files
             Number <- rep_along(training.Number, 1:20) # Split into 20 separate files
@@ -91,7 +94,8 @@ Define the Corpus Axe text splitting function, a similar function is used for th
 ```
 
 Read the corpora and actually split the files using corpus.Axe
-```{r Chop, echo=TRUE}
+
+```r
     corpus.Axe(blog.con, blog.lines)
     corpus.Axe(twitter.con, twitter.lines)
     corpus.Axe(news.con, news.lines)
@@ -106,7 +110,8 @@ Read the corpora and actually split the files using corpus.Axe
 Note: After each chunk was read, R had to be reset. Originally, the code was written to iteratively process all 5 chunks, but R crashed during the reading of the second chunk. After trying to process smaller sets numerous times, due to the constraints of this computer, the optimal size for the training set was 5 chunks of 4 files each. 
     
 ### 4. Read lines from the new split files, then save 4 files each to 5 data tables 
-```{r Chunks, echo=TRUE}
+
+```r
     To <- Sys.time()
             for (file.path in training.Path) {
                 print(file.path)
@@ -234,7 +239,8 @@ Note: After each chunk was read, R had to be reset. Originally, the code was wri
 ### 5. Filter each table using the profanity index
     
 Note: nasty.txt is a file that was reduced from the "List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words-master" acquired from Google. The original file was filtering 1700 some profanities, many of which were not words or would have already been filtered in the processing of text. These were removed by hand and saved as 'nasty.txt' in order to improve the efficiency of profanity filtration. Each of the 5 ngram table chunks were filtered separately and saved per memory allocation issues. 
-``` {r Filtration, echo=TRUE}
+
+```r
  nasty <- unlist(fread(paste0(working.directory, "nasty.txt"), header = F, fill = T))
         
     # ^ looks for start
@@ -295,7 +301,8 @@ Note: nasty.txt is a file that was reduced from the "List-of-Dirty-Naughty-Obsce
 ```
 
 ### 6. Concatenate Tables
-```{r Concatenate, echo=TRUE}
+
+```r
     load(paste0(path, "filtered_", 1, ".RData"))
     ngram.all <- ngram.Table
     load(paste0(path, "filtered_", 2, ".RData"))
@@ -316,25 +323,29 @@ Note: nasty.txt is a file that was reduced from the "List-of-Dirty-Naughty-Obsce
 ### 7. Process any aggregates, calculate probabilities, and save as text file
 
 Load the saved filtered data
-``` {r load, echo=TRUE}
+
+```r
     load(paste0(path, "filtered.RData"))
 ```
 
 Sum the phrases and predictions in the table, then sort by phrase
-``` {r sort, echo=TRUE}
+
+```r
     ngram.Table <- ngram.Table[, lapply(.SD, sum, na.rm = T), by = list(Phrase, Prediction)]
     ngram.Table <- setorder(ngram.Table, Phrase, -Count)[, index := seq_len(.N), by = Phrase]
 ```
 
 Set the number of predictions to be returned, then calculate probabilites for each prediction following a phrase
-```{r probability, echo=TRUE}
+
+```r
     ngram.Table <- ngram.Table[index <= 8] 
     ngram.Table[, Probability := Count / Phrase.Count]
     ngram.Table <- setorder(ngram.Table, Phrase, -Probability)[, index := seq_len(.N), by = Phrase]
 ```
 
 Write to file, named 'filtered.txt', which will be sourced and read by the Prognosticator Function and deployed in the ShinyApp.
-```{r write, echo=TRUE}
+
+```r
     fwrite(ngram.Table[, c("Phrase", "Prediction", "Probability")], 
            file = paste0(working.directory, "Prognosticator/filtered.txt"), append = F)
     rm(ngram.Table); gc()
@@ -345,7 +356,8 @@ Write to file, named 'filtered.txt', which will be sourced and read by the Progn
 
 After all of the above code has been executed once, only the Prognosticator.R function needs to be run to make the predictions. In order to Run prognosticator, a string must be input in quotations, and then the function will output it's top 8 predictions with their associated probabilities.  
 
-```{r Prognosticator}
+
+```r
     source("Prognosticator.R")
 ```
 
